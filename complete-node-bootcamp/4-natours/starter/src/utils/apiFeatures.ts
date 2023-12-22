@@ -1,5 +1,17 @@
-class APIFeatures {
-  constructor(query, queryString) {
+import { Model, Document, Query } from 'mongoose';
+
+interface QueryString {
+  sort: string;
+  fields: string;
+  page: number;
+  limit: number;
+}
+
+class APIFeatures<T extends Document> {
+  query: Query<T[], T>;
+  queryString: QueryString;
+
+  constructor(query: Query<T[], T>, queryString: QueryString | any) {
     this.query = query;
     this.queryString = queryString;
   }
@@ -7,7 +19,7 @@ class APIFeatures {
   filter() {
     const queryObj = { ...this.queryString };
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
-    excludedFields.forEach((el) => delete queryObj[el]);
+    excludedFields.forEach((el) => delete queryObj[el as keyof QueryString]);
 
     // 2) Advanced filtering
     let queryStr = JSON.stringify(queryObj);
@@ -20,7 +32,7 @@ class APIFeatures {
   }
 
   sort() {
-    if (this.queryString.sort) {
+    if (typeof this.queryString.sort === 'string') {
       const sortBy = this.queryString.sort.split(',').join(' ');
       this.query = this.query.sort(sortBy);
     } else {
@@ -33,9 +45,9 @@ class APIFeatures {
   limitFields() {
     if (this.queryString.fields) {
       const fields = this.queryString.fields.split(',').join(' ');
-      this.query = this.query.select(fields);
+      this.query = this.query.select(fields) as any; // Type assertion to 'any'
     } else {
-      this.query.select('-__v');
+      this.query = this.query.select('-__v') as any; // Type assertion to 'any'
     }
 
     return this;
@@ -51,4 +63,4 @@ class APIFeatures {
   }
 }
 
-module.exports = APIFeatures;
+export default APIFeatures;

@@ -1,8 +1,28 @@
-const mongoose = require('mongoose');
-const slugify = require('slugify');
-//const validator = require('validator');
+import { Schema, Document, Model, Query, model } from 'mongoose';
+import slugify from 'slugify';
 
-const tourSchema = mongoose.Schema(
+interface ITourDoc extends Document {
+  name: string;
+  slug: string;
+  duration: number;
+  maxGroupSize: number;
+  difficulty: string;
+  ratingsAverage: number;
+  ratingsQuantity: number;
+  price: number;
+  priceDiscount?: number;
+  summary: string;
+  description?: string;
+  imageCover: string;
+  images?: string[];
+  createdAt: Date;
+  startDates?: Date[];
+  secretTour?: boolean;
+  durationWeeks?: number;
+  start: number;
+}
+
+const tourSchema = new Schema<ITourDoc>(
   {
     name: {
       type: String,
@@ -17,6 +37,7 @@ const tourSchema = mongoose.Schema(
       }, */
     },
     slug: String,
+    start: Number,
     duration: {
       type: Number,
       required: [true, 'A tour must have a duration'],
@@ -50,7 +71,7 @@ const tourSchema = mongoose.Schema(
     priceDiscount: {
       type: Number,
       validate: {
-        validator: function (val) {
+        validator: function (this: ITourDoc, val: number): boolean {
           // this only points to current doc on New document creation
           return val < this.price;
         },
@@ -109,16 +130,19 @@ tourSchema.post('save', (doc, next) => {
 });
 
 //QUERY MIDDLEWARE
-tourSchema.pre(/^find/, function (next) {
+tourSchema.pre('find', function (next) {
   this.find({
     secretTour: { $ne: true },
   });
+
   this.start = Date.now();
+
   next();
 });
 
-tourSchema.post(/^find/, function (docs, next) {
-  console.log(`Query took ${Date.now() - this.start} milliseconds`);
+tourSchema.post('find', function (doc, next) {
+  if (this.start)
+    console.log(`Query took ${Date.now() - this.start!} milliseconds`);
 
   next();
 });
@@ -132,4 +156,4 @@ tourSchema.pre('aggregate', function (next) {
 });
 const Tour = mongoose.model('Tour', tourSchema);
 
-module.exports = Tour;
+export default Tour;

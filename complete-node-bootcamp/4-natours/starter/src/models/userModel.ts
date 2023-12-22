@@ -1,9 +1,30 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
-const bcrypt = require('bcryptjs');
+import { InferSchemaType, Schema, model, Model } from 'mongoose';
+import validator from 'validator';
+import bcrypt from 'bcryptjs';
+
 //name, email, photo, password, passwordConfirm
 
-const userSchema = mongoose.Schema({
+interface IUserDoc {
+  name: string;
+  email: string;
+  photo: string;
+  role: 'user' | 'guide' | 'lead-guide' | 'admin';
+  password: string;
+  passwordConfirm?: string;
+  passwordChangedAt?: Date;
+}
+
+interface IUserMethods {
+  correctPassword: (
+    candidatePassword: string,
+    userPass: string
+  ) => Promise<boolean>;
+  changedPasswordAfter: (JWTTimestamp: number) => boolean;
+}
+
+type UserModel = Model<IUserDoc, {}, IUserMethods>;
+
+const userSchema = new Schema<IUserDoc, UserModel, IUserMethods>({
   name: {
     type: String,
     required: [true, 'A user must have a name'],
@@ -29,11 +50,11 @@ const userSchema = mongoose.Schema({
     select: false, //Nunca se muestra
   },
   passwordConfirm: {
-    type: String,
+    type: String || undefined,
     required: [true, 'Please confirm your password'],
     validate: {
       //This only works on SAVE!!
-      validator: function (el) {
+      validator: function (this: IUserDoc, el: string): boolean {
         return el === this.password;
       },
       message: 'Passwords are not the same',
@@ -65,7 +86,7 @@ userSchema.methods.correctPassword = async function (
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(
-      this.passwordChangedAt.getTime() / 1000,
+      this.passwordChangedAt.getTime() / 1000 + '',
       10
     );
     // console.log(changedTimestamp, JWTTimestamp);
@@ -77,4 +98,4 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 
 const userModel = mongoose.model('User', userSchema);
 
-module.exports = userModel;
+export default userModel;

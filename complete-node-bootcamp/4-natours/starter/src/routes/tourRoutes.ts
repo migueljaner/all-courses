@@ -1,6 +1,7 @@
-const express = require('express');
-const tourController = require('../controllers/tourController');
-const authController = require('../controllers/authController');
+import express from 'express';
+import * as tourController from '../controllers/tourController';
+import * as authController from '../controllers/authController';
+
 const router = express.Router();
 
 // router.param('id', tourController.checkID);
@@ -24,4 +25,4 @@ router
     tourController.deleteTour
   );
 
-module.exports = router;
+export default router;

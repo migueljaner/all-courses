@@ -1,10 +1,9 @@
-const express = require('express');
-const morgan = require('morgan');
-
-const globalErrorHandler = require('./controllers/errorController');
-const AppError = require('./utils/appError');
-const tourRouter = require('./routes/tourRoutes');
-const userRouter = require('./routes/userRoutes');
+import express, { Request, Response } from 'express';
+import morgan from 'morgan';
+import globalErrorHandler from './controllers/errorController';
+import AppError from './utils/appError';
+import tourRouter from './routes/tourRoutes';
+import userRouter from './routes/userRoutes';
 
 const app = express();
 
@@ -16,7 +15,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use(express.json());
 app.use(express.static(`${__dirname}/public`));
 
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next) => {
   req.requestTime = new Date().toISOString();
 
   next();

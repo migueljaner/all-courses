@@ -1,20 +1,38 @@
-const AppError = require('../utils/appError');
+import { NextFunction, Request, Response } from 'express';
+import AppError from '../utils/appError';
+import { CastError, Error } from 'mongoose';
 
-const handleCastErrorDB = (err) => {
+type IError = {
+  path?: string;
+  value?: string;
+  errmsg?: string;
+  code?: number;
+  name?: string;
+  errors?: Error;
+  isOperational?: boolean;
+  statusCode?: number;
+  status?: string;
+  message?: string;
+  stack?: string;
+  stringValue?: string;
+  kind?: string;
+};
+
+const handleCastErrorDB = (err: IError) => {
   const message = `Invalid ${err.path}: ${err.value}`;
   return new AppError(message, 400);
 };
 
-const handleDuplicateFieldsDB = (err) => {
-  const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
+const handleDuplicateFieldsDB = (err: IError) => {
+  const value = err.errmsg?.match(/(["'])(\\?.)*?\1/)![0];
   console.log(value);
 
   const message = `Duplicate field value: ${value}. Please use another value`;
   return new AppError(message, 400);
 };
 
-const handleValidationErrorDB = (err) => {
-  const errors = Object.values(err.errors).map((el) => el.message);
+const handleValidationErrorDB = (err: IError) => {
+  const errors = Object.values(err.errors!).map((el) => el.message);
   const message = `Invalid input data. ${errors.join('. ')}`;
   return new AppError(message, 400);
 };
@@ -25,8 +43,8 @@ const handleJWTError = () =>
 const handleJWTExpiredError = () =>
   new AppError('Your token has expired! Please log in again!', 401);
 
-const sendErrorDev = (err, res) => {
-  res.status(err.statusCode).json({
+const sendErrorDev = (err: IError, res: Response) => {
+  res.status(err.statusCode!).json({
     status: err.status,
     error: err,
     message: err.message,
@@ -34,9 +52,9 @@ const sendErrorDev = (err, res) => {
   });
 };
 
-const sendErrorProd = (err, res) => {
+const sendErrorProd = (err: IError, res: Response) => {
   if (err.isOperational) {
-    res.status(err.statusCode).json({
+    res.status(err.statusCode!).json({
       status: err.status,
       message: err.message,
     });
@@ -53,7 +71,7 @@ const sendErrorProd = (err, res) => {
   }
 };
 
-module.exports = (err, req, res, next) => {
+export = (err: IError, req: Request, res: Response, next: NextFunction) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
   if (process.env.NODE_ENV === 'development') {
