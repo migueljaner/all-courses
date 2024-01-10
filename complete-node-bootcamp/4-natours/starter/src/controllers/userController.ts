@@ -9,7 +9,7 @@ export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
     status: 'succes',
     results: users.length,
     data: {
-      tours: users,
+      users: users,
     },
   });
 });
