@@ -15,11 +15,23 @@ const signToken = (id: string) =>
 const createSendToken = (user: any, statusCode: number, res: Response) => {
   const token = signToken(user._id.toString());
 
-  res.status(statusCode).json({
-    status: 'succes',
-    token,
-    data: user,
-  });
+  user.password = undefined;
+
+  res
+    .status(statusCode)
+    .cookie('jwt', token, {
+      expires: new Date(
+        Date.now() +
+          Number(process.env.JWT_COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000
+      ),
+      httpOnly: true,
+      //We only activate this in production
+      secure: process.env.NODE_ENV === 'production' ? true : false,
+    })
+    .json({
+      status: 'succes',
+      data: user,
+    });
 };
 
 export const signup = catchAsync(

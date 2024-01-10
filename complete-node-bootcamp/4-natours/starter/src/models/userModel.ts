@@ -15,6 +15,7 @@ interface IUserDoc {
   passwordChangedAt?: Date;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
+  active?: boolean;
 }
 
 interface IUserMethods {
@@ -64,6 +65,11 @@ const userSchema = new Schema<IUserDoc, UserModel, IUserMethods>({
       message: 'Passwords are not the same',
     },
   },
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
@@ -88,6 +94,12 @@ userSchema.pre('save', function (next) {
 
   //Substract 1 second to avoid errors
   this.passwordChangedAt = new Date(Date.now() - 1000);
+  next();
+});
+
+userSchema.pre(/^find/, function (next) {
+  //this points to the current query
+  this.find({ active: { $ne: false } });
   next();
 });
 
