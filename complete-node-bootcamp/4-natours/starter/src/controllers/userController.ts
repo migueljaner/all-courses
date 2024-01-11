@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import User from '../models/userModel';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
+import * as factory from './handlerFactory';
 
 const filterObj = (obj: any, ...allowedFields: string[]) => {
   const newObj: any = {};
@@ -12,6 +13,11 @@ const filterObj = (obj: any, ...allowedFields: string[]) => {
 
   return newObj;
 };
+
+export const getUser = factory.getOne(User);
+export const createUser = factory.createOne(User);
+export const updateUser = factory.updateOne(User);
+export const deleteUser = factory.deleteOne(User);
 
 export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   const users = await User.find();
@@ -64,31 +70,3 @@ export const deleteMe = catchAsync(
     });
   }
 );
-
-export const getUser = (req: Request, res: Response) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined',
-  });
-};
-
-export const createUser = (req: Request, res: Response) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined',
-  });
-};
-
-export const updateUser = (req: Request, res: Response) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined',
-  });
-};
-
-export const deleteUser = (req: Request, res: Response) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined',
-  });
-};

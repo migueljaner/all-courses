@@ -1,6 +1,8 @@
 import express from 'express';
 import * as tourController from '../controllers/tourController';
 import * as authController from '../controllers/authController';
+import * as reviewController from '../controllers/reviewController';
+import reviewRouter from './reviewRoutes';
 
 const router = express.Router();
 
@@ -10,11 +12,14 @@ router
   .get(tourController.aliasTopTours, tourController.getAllTours);
 
 router.route('/tour-stats').get(tourController.getTourStats);
+
 router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
+
 router
   .route('/')
   .get(authController.protect, tourController.getAllTours)
   .post(tourController.createTour);
+
 router
   .route('/:id')
   .get(tourController.getTour)
@@ -25,4 +30,5 @@ router
     tourController.deleteTour
   );
 
+router.use('/:tourId/reviews', reviewRouter);
 export default router;

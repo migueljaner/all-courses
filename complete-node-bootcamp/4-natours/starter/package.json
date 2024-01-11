@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "import:data": "npx ts-node -T src/dev-data/data/import-dev-data.ts --import",
+    "delete:data": "npx ts-node -T src/dev-data/data/import-dev-data.ts --delete",
     "start:dev": "nodemon src/server.ts",
     "start:prod": "SET NODE_ENV=production&&nodemon server.js",
     "debug": "node --inspect-brk server.js"

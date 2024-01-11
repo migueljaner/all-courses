@@ -68,7 +68,7 @@ exports.getAllTours = (0, catchAsync_1.default)(async (req, res, next) => {
     });
 });
 exports.getTour = (0, catchAsync_1.default)(async (req, res, next) => {
-    const tour = await tourModel_1.default.findById(req.params.id).lean();
+    const tour = await tourModel_1.default.findById(req.params.id).lean().populate('reviews');
     if (!tour) {
         return next(new appError_1.default('No tour found with that ID', 404));
     }

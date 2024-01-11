@@ -4,6 +4,7 @@ import globalErrorHandler from './controllers/errorController';
 import AppError from './utils/appError';
 import tourRouter from './routes/tourRoutes';
 import userRouter from './routes/userRoutes';
+import reviewRouter from './routes/reviewRoutes';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
@@ -68,6 +69,7 @@ app.use((req: Request, res: Response, next) => {
 // 3) Routes
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 app.all('*', (req, res, next) => {
   /* res.status(404).json({
     status: 'fail',

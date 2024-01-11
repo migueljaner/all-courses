@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Mongoose } from 'mongoose';
 import slugify from 'slugify';
 
 interface ITourDoc extends Document {
@@ -18,6 +18,21 @@ interface ITourDoc extends Document {
   createdAt: Date;
   startDates?: Date[];
   secretTour?: boolean;
+  startLocation?: {
+    type: string;
+    coordinates: number[];
+    address: string;
+    description: string;
+  };
+  locations?: {
+    type: string;
+    coordinates: number[];
+    address: string;
+    description: string;
+    day: number;
+  }[];
+  guides?: Schema.Types.ObjectId[];
+  reviews?: Schema.Types.ObjectId[];
   durationWeeks?: number;
   start: number;
 }
@@ -102,6 +117,37 @@ const tourSchema = new Schema<ITourDoc>(
       type: Boolean,
       default: false,
     },
+    startLocation: {
+      // GeoJSON
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      // GeoJSON
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    guides: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   {
     toJSON: { virtuals: true },
@@ -114,20 +160,45 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+//VIRTUAL POPULATE
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id',
+});
+
 //DOCUMENT MIDDLEWARE: run before .save() and .create()
 
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
-tourSchema.pre('save', (next) => {
-  console.log('Will save document...');
+
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt',
+  });
+
   next();
 });
-tourSchema.post('save', (doc, next) => {
-  console.log(doc);
-  next();
-});
+
+// tourSchema.pre('save', async function (next) {
+//   const guidesPromises = this.guides?.map(async (id) => User.findById(id));
+
+//   if (guidesPromises) this.guides = await Promise.all(guidesPromises!);
+
+//   next();
+// });
+
+// tourSchema.pre('save', (next) => {
+//   console.log('Will save document...');
+//   next();
+// });
+// tourSchema.post('save', (doc, next) => {
+//   console.log(doc);
+//   next();
+// });
 
 //QUERY MIDDLEWARE
 tourSchema.pre('find', function (next) {

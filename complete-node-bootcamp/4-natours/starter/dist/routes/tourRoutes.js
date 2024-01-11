@@ -29,6 +29,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const tourController = __importStar(require("../controllers/tourController"));
 const authController = __importStar(require("../controllers/authController"));
+const reviewController = __importStar(require("../controllers/reviewController"));
 const router = express_1.default.Router();
 // router.param('id', tourController.checkID);
 router
@@ -45,4 +46,7 @@ router
     .get(tourController.getTour)
     .patch(tourController.updateTour)
     .delete(authController.protect, authController.restrictTo('admin', 'lead-guide'), tourController.deleteTour);
+router
+    .route('/:tourId/reviews')
+    .post(authController.protect, authController.restrictTo('user'), reviewController.createReview);
 exports.default = router;
