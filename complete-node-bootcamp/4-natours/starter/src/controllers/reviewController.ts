@@ -4,21 +4,11 @@ import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
 import * as factory from './handlerFactory';
 
-export const getAllReviews = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const filter = req.params.tourId ? { tour: req.params.tourId } : {};
-
-    const reviews = await Review.find(filter);
-
-    res.status(200).json({
-      status: 'success',
-      results: reviews.length,
-      data: {
-        reviews,
-      },
-    });
-  }
-);
+export const getAllReviews = factory.getAll(Review);
+export const getReview = factory.getOne(Review);
+export const createReview = factory.createOne(Review);
+export const updateReview = factory.updateOne(Review);
+export const deleteReview = factory.deleteOne(Review);
 
 export const setTourUserIds = (
   req: Request,
@@ -50,8 +40,3 @@ export const getReviewByTour = catchAsync(
     });
   }
 );
-
-export const getReview = factory.getOne(Review);
-export const createReview = factory.createOne(Review);
-export const updateReview = factory.updateOne(Review);
-export const deleteReview = factory.deleteOne(Review);

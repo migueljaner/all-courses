@@ -14,22 +14,16 @@ const filterObj = (obj: any, ...allowedFields: string[]) => {
   return newObj;
 };
 
+export const getAllUsers = factory.getAll(User);
 export const getUser = factory.getOne(User);
 export const createUser = factory.createOne(User);
 export const updateUser = factory.updateOne(User);
 export const deleteUser = factory.deleteOne(User);
 
-export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
-  const users = await User.find();
-
-  res.status(200).json({
-    status: 'succes',
-    results: users.length,
-    data: {
-      users: users,
-    },
-  });
-});
+export const getMe = (req: Request, res: Response, next: NextFunction) => {
+  req.params.id = req.user!.id;
+  next();
+};
 
 export const updateMe = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -59,7 +53,6 @@ export const updateMe = catchAsync(
     });
   }
 );
-
 export const deleteMe = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     await User.findByIdAndUpdate(req.user!.id, { active: false });
