@@ -1,6 +1,7 @@
 import mongoose, { Model, Schema } from 'mongoose';
+import Tour from './tourModel';
 
-interface IReviewDoc {
+interface IReviewDoc extends Document {
   review: string;
   rating: number;
   createdAt: Date;
@@ -8,7 +9,9 @@ interface IReviewDoc {
   user: Schema.Types.ObjectId;
 }
 
-type ReviewModel = Model<IReviewDoc>;
+interface ReviewModel extends Model<IReviewDoc> {
+  calcAverageRatings: (tourId: string) => Promise<void>;
+}
 
 const reviewSchema = new Schema<IReviewDoc, ReviewModel>(
   {
@@ -42,6 +45,8 @@ const reviewSchema = new Schema<IReviewDoc, ReviewModel>(
   }
 );
 
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
 reviewSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'user',
@@ -58,6 +63,42 @@ reviewSchema.pre(/^find/, function (next) {
   });
 
   next();
+});
+
+reviewSchema.statics.calcAverageRatings = async function (tourId: string) {
+  const stats = await this.aggregate([
+    {
+      $match: { tour: tourId },
+    },
+    {
+      $group: {
+        _id: '$tour',
+        nRating: { $sum: 1 },
+        avgRating: { $avg: '$rating' },
+      },
+    },
+  ]);
+
+  if (stats.length > 0)
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: stats[0].nRating,
+      ratingsAverage: stats[0].avgRating,
+    });
+  else
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: 0,
+      ratingsAverage: 4.5,
+    });
+};
+
+reviewSchema.post('save', function (next) {
+  const model = this.constructor as ReviewModel;
+  model.calcAverageRatings(this.tour.toString());
+});
+
+reviewSchema.post(/^findOneAnd/, async function (doc: IReviewDoc) {
+  const model = this.constructor as ReviewModel;
+  if (doc) await model.calcAverageRatings(doc.tour.toString());
 });
 
 const Review = mongoose.model<IReviewDoc, ReviewModel>('Review', reviewSchema);
