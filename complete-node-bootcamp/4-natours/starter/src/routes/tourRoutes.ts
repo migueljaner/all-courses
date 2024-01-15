@@ -1,7 +1,6 @@
 import express from 'express';
 import * as tourController from '../controllers/tourController';
 import * as authController from '../controllers/authController';
-import * as reviewController from '../controllers/reviewController';
 import reviewRouter from './reviewRoutes';
 
 const router = express.Router();
@@ -17,6 +16,12 @@ router
     authController.restrictTo('admin', 'lead-guide', 'guide'),
     tourController.getMonthlyPlan
   );
+
+router
+  .route('/tours-within/:distance/center/:latlng/unit/:unit')
+  .get(tourController.getToursWithin);
+
+router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances);
 
 router
   .route('/')
