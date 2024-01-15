@@ -29,7 +29,7 @@ const createSendToken = (user: any, statusCode: number, res: Response) => {
       secure: process.env.NODE_ENV === 'production' ? true : false,
     })
     .json({
-      status: 'succes',
+      status: 'success',
       data: user,
     });
 };
@@ -69,21 +69,22 @@ export const login = catchAsync(
   }
 );
 
+export const logout = (req: Request, res: Response) => {
+  res
+    .cookie('jwt', 'loggedout', {
+      expires: new Date(Date.now() + 10 * 1000),
+      httpOnly: true,
+    })
+    .status(200)
+    .json({ status: 'success' });
+};
+
 export const protect = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // 1) Getting token and check of it's there
     let token;
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith('Bearer')
-    ) {
-      token = req.headers.authorization.split(' ')[1];
-    } else if (req.headers.cookie?.includes('jwt')) {
-      req.headers.cookie?.split(';').forEach((cookie) => {
-        if (cookie.includes('jwt')) {
-          token = cookie.split('=')[1];
-        }
-      });
+    if (req.cookies.jwt) {
+      token = req.cookies.jwt;
     }
 
     if (!token) {
@@ -122,9 +123,56 @@ export const protect = catchAsync(
     //Grant acces to protected route
 
     req.user = freshUser;
+    res.locals.user = freshUser;
     next();
   }
 );
+//Only for rendered pages, no errors!
+export const isLoggedIn = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  // 1) Getting token and check of it's there
+  let token;
+
+  if (req.cookies.jwt && req.cookies.jwt !== 'loggedout') {
+    try {
+      token = req.cookies.jwt;
+      const verifyAsync = promisify(jwt.verify) as (
+        arg1: any,
+        arg2: any
+      ) => any;
+
+      const decoded = await verifyAsync(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
+
+      // 2) Verification token
+
+      // 3) Check if user still exists
+      const freshUser = await User.findById(decoded.id);
+
+      if (!freshUser) {
+        return next();
+      }
+
+      // 4) Check if user changed password after jwt was issued
+      if (freshUser.changedPasswordAfter(decoded.iat)) {
+        return next();
+      }
+
+      //Grant acces to protected route
+      res.locals.user = freshUser;
+      return next();
+    } catch (err) {
+      return next();
+    }
+  }
+
+  return next();
+};
 
 export const restrictTo =
   (...roles: Array<'user' | 'guide' | 'lead-guide' | 'admin'>) =>

@@ -46,7 +46,7 @@ export const updateMe = catchAsync(
     });
 
     res.status(200).json({
-      status: 'succes',
+      status: 'success',
       data: {
         user: user,
       },
