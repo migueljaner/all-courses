@@ -35,8 +35,9 @@ if (userDataFrom)
     const formData = new FormData(userDataFrom);
     const name = formData.get('name');
     const email = formData.get('email');
+    const photo = formData.get('photo');
 
-    await updateSettings({ name, email }, 'data');
+    await updateSettings({ name, email, photo }, 'data');
   });
 
 if (userSettingsFrom)

@@ -11815,7 +11815,8 @@
       const formData = new FormData(userDataFrom);
       const name = formData.get("name");
       const email = formData.get("email");
-      await updateSettings({ name, email }, "data");
+      const photo = formData.get("photo");
+      await updateSettings({ name, email, photo }, "data");
     });
   if (userSettingsFrom)
     userSettingsFrom.addEventListener("submit", async (e) => {

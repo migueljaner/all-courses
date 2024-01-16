@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Mongoose } from 'mongoose';
-import { Query } from 'mongoose';
 import slugify from 'slugify';
 
 interface ITourDoc extends Document {
