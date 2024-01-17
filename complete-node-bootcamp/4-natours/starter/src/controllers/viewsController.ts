@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import Tour from '../models/tourModel';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
+import Booking from '../models/bookingModel';
 
 export const getOverview = catchAsync(async (req: Request, res: Response) => {
   // 1) Get tour data from collection
@@ -41,6 +42,19 @@ export const getLoginForm = (req: Request, res: Response) => {
     title: 'Log into your account',
   });
 };
+
+export const getMyTours = catchAsync(async (req: Request, res: Response) => {
+  // 1) Find all bookings
+  const bookings = await Booking.find({ user: req.user.id });
+  const tourIds = bookings.map((el) => el.tour);
+
+  const tours = await Tour.find({ _id: { $in: tourIds } });
+
+  res.status(200).render('overview', {
+    title: 'My Tours',
+    tours,
+  });
+});
 
 export const getAccount = (req: Request, res: Response) => {
   res.status(200).render('useracc', {

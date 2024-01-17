@@ -37,7 +37,11 @@ router
   .get(tourController.getTour)
   //All from here are protected routes
   .all(authController.protect, authController.restrictTo('admin', 'lead-guide'))
-  .patch(tourController.updateTour)
+  .patch(
+    tourController.uploadTourImages,
+    tourController.resizeTourImages,
+    tourController.updateTour
+  )
   .delete(tourController.deleteTour);
 
 router.use('/:tourId/reviews', reviewRouter);

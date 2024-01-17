@@ -5,7 +5,7 @@ import crypto from 'crypto';
 
 //name, email, photo, password, passwordConfirm
 
-interface IUserDoc {
+export interface IUserDoc {
   name: string;
   email: string;
   photo: string;

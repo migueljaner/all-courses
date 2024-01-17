@@ -20,7 +20,7 @@ block content
                 .admin-nav
                     h5.admin-nav__heading Admin
                     ul.side-nav
-                        +navItem('#', 'Manage tours', 'map')
+                        +navItem('/my-tours', 'Manage tours', 'map')
                         +navItem('#', 'Manage users', 'users')
                         +navItem('#', 'Manage reviews', 'star')
                         +navItem('#', 'Manage bookings', 'briefcase')
@@ -46,13 +46,13 @@ block content
                     h2.heading-secondary.ma-bt-md Password change
                     form.form.form-user-settings
                         .form__group
-                            label.form__label(for='password-current') Current password
+                            label.form__label(for='passwordCurrent') Current password
                             input#password-current.form__input(type='password',name='passwordCurrent' placeholder='••••••••', required, minlength='8')
                         .form__group
                             label.form__label(for='password') New password
                             input#password.form__input(type='password', placeholder='••••••••',name='password' required, minlength='8')
                         .form__group.ma-bt-lg
-                            label.form__label(for='password-confirm') Confirm password
+                            label.form__label(for='passwordConfirm') Confirm password
                             input#password-confirm.form__input(type='password',name='passwordConfirm' placeholder='••••••••', required, minlength='8')
                         .form__group.right
                             button.btn.btn--small.btn--green Save password

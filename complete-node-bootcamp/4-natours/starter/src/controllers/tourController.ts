@@ -1,9 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 import Tour from '../models/tourModel';
-import APIFeatures from '../utils/apiFeatures';
 import AppError from '../utils/appError';
 import catchAsync from '../utils/catchAsync';
 import * as factory from './handlerFactory';
+import multer from 'multer';
+import sharp from 'sharp';
+import path from 'path';
 
 export const getAllTours = factory.getAll(Tour);
 export const getTour = factory.getOne(Tour, { path: 'reviews' });
@@ -21,6 +23,68 @@ export const aliasTopTours = (
   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
   next();
 };
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (
+  req: Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback
+) => {
+  if (file.mimetype.startsWith('image')) cb(null, true);
+  else {
+    cb(null, false);
+    cb(new AppError('Not an image! Please upload only images.', 400));
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+export const resizeTourImages = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+    if (!files.imageCover || !files.images) return next();
+
+    // 1) Cover image
+    req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpeg`;
+
+    await sharp(files.imageCover[0].buffer)
+      .resize(2000, 1333)
+      .toFormat('jpeg')
+      .jpeg({ quality: 90 })
+      .toFile(
+        path.join(__dirname, `../public/img/tours/${req.body.imageCover}`)
+      );
+
+    // 2) Images
+    req.body.images = [];
+
+    await Promise.all(
+      files.images.map(async (file: Express.Multer.File, i: number) => {
+        const filename = `tour-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
+
+        await sharp(file.buffer)
+          .resize(2000, 1333)
+          .toFormat('jpeg')
+          .jpeg({ quality: 90 })
+          .toFile(path.join(__dirname, `../public/img/tours/${filename}`));
+
+        req.body.images.push(filename);
+      })
+    );
+
+    next();
+  }
+);
+
+export const uploadTourImages = upload.fields([
+  { name: 'imageCover', maxCount: 1 },
+  { name: 'images', maxCount: 3 },
+]);
 
 export const getTourStats = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {

@@ -2,12 +2,14 @@
 import { login, logout } from './login';
 import { displayMap } from './leaflet';
 import { updateSettings } from './updatesettings';
+import { bookTour } from './stripe';
 
 const leaflet = document.getElementById('map');
 const logoutBtn = document.querySelector('.nav__el--logout');
 const loginForm = document.querySelector('.form.login-form');
 const userDataFrom = document.querySelector('.form-user-data');
 const userSettingsFrom = document.querySelector('.form-user-settings');
+const bookBtn = document.getElementById('book-tour');
 
 if (leaflet) {
   const locations = JSON.parse(
@@ -33,11 +35,9 @@ if (userDataFrom)
     e.preventDefault();
 
     const formData = new FormData(userDataFrom);
-    const name = formData.get('name');
-    const email = formData.get('email');
-    const photo = formData.get('photo');
+    const formDataObj = Object.fromEntries(formData.entries());
 
-    await updateSettings(formData, 'data');
+    await updateSettings(formDataObj, 'data');
   });
 
 if (userSettingsFrom)
@@ -45,11 +45,17 @@ if (userSettingsFrom)
     e.preventDefault();
 
     const formData = new FormData(userSettingsFrom);
-    const passwordCurrent = formData.get('passwordCurrent');
-    const password = formData.get('password');
-    const passwordConfirm = formData.get('passwordConfirm');
+    const formDataObj = Object.fromEntries(formData.entries());
 
-    await updateSettings(formData, 'password');
+    await updateSettings(formDataObj, 'password');
   });
 
 if (logoutBtn) logoutBtn.addEventListener('click', logout);
+
+if (bookBtn)
+  bookBtn.addEventListener('click', async (e) => {
+    e.target.textContent = 'Processing...';
+
+    const { tourId } = e.target.dataset;
+    await bookTour(tourId);
+  });

@@ -11772,6 +11772,7 @@
   // src/public/js/updatesettings.js
   var updateSettings = async (data, type) => {
     try {
+      console.log("data", data);
       const url = type === "password" ? "/api/v1/users/updateMyPassword" : "/api/v1/users/updateMe";
       const res = await axios_default({
         method: "PATCH",
@@ -11789,12 +11790,29 @@
     }
   };
 
+  // src/public/js/stripe.js
+  var stripe = Stripe(
+    "pk_test_51OZXApHXpzPsRpgcoIIse8LIXDpKTYGUN1OlLflYyCLWXrdrT35nfIvLcVBJSFR6DCGkm0xITvlC8nYbn7ulugCg002Rza028g"
+  );
+  var bookTour = async (tourId) => {
+    try {
+      const session = await axios_default(`/api/v1/bookings/checkout-session/${tourId}`);
+      await stripe.redirectToCheckout({
+        sessionId: session.data.session.id
+      });
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
+  };
+
   // src/public/js/index.js
   var leaflet = document.getElementById("map");
   var logoutBtn = document.querySelector(".nav__el--logout");
   var loginForm = document.querySelector(".form.login-form");
   var userDataFrom = document.querySelector(".form-user-data");
   var userSettingsFrom = document.querySelector(".form-user-settings");
+  var bookBtn = document.getElementById("book-tour");
   if (leaflet) {
     const locations = JSON.parse(
       document.getElementById("map").dataset.locations
@@ -11813,22 +11831,24 @@
     userDataFrom.addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(userDataFrom);
-      const name = formData.get("name");
-      const email = formData.get("email");
-      const photo = formData.get("photo");
-      await updateSettings(formData, "data");
+      const formDataObj = Object.fromEntries(formData.entries());
+      await updateSettings(formDataObj, "data");
     });
   if (userSettingsFrom)
     userSettingsFrom.addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(userSettingsFrom);
-      const passwordCurrent = formData.get("passwordCurrent");
-      const password = formData.get("password");
-      const passwordConfirm = formData.get("passwordConfirm");
-      await updateSettings(formData, "password");
+      const formDataObj = Object.fromEntries(formData.entries());
+      await updateSettings(formDataObj, "password");
     });
   if (logoutBtn)
     logoutBtn.addEventListener("click", logout);
+  if (bookBtn)
+    bookBtn.addEventListener("click", async (e) => {
+      e.target.textContent = "Processing...";
+      const { tourId } = e.target.dataset;
+      await bookTour(tourId);
+    });
 })();
 /*! Bundled license information:
 
