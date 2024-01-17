@@ -15,7 +15,10 @@ const multerFilter = (
   cb: multer.FileFilterCallback
 ) => {
   if (file.mimetype.startsWith('image')) cb(null, true);
-  else cb(new AppError('Not an image! Please upload only images.', 400), false);
+  else {
+    cb(null, false);
+    cb(new AppError('Not an image! Please upload only images.', 400));
+  }
 };
 
 const upload = multer({

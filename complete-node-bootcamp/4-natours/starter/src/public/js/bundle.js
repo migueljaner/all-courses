@@ -11816,7 +11816,7 @@
       const name = formData.get("name");
       const email = formData.get("email");
       const photo = formData.get("photo");
-      await updateSettings({ name, email, photo }, "data");
+      await updateSettings(formData, "data");
     });
   if (userSettingsFrom)
     userSettingsFrom.addEventListener("submit", async (e) => {
@@ -11825,10 +11825,7 @@
       const passwordCurrent = formData.get("passwordCurrent");
       const password = formData.get("password");
       const passwordConfirm = formData.get("passwordConfirm");
-      await updateSettings(
-        { passwordCurrent, password, passwordConfirm },
-        "password"
-      );
+      await updateSettings(formData, "password");
     });
   if (logoutBtn)
     logoutBtn.addEventListener("click", logout);
