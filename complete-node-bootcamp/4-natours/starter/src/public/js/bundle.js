@@ -11772,15 +11772,16 @@
   // src/public/js/updatesettings.js
   var updateSettings = async (data, type) => {
     try {
-      console.log("data", data);
       const url = type === "password" ? "/api/v1/users/updateMyPassword" : "/api/v1/users/updateMe";
       const res = await axios_default({
         method: "PATCH",
         url,
-        data
+        data,
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
       });
       if (res.data.status === "success") {
-        alert("Data updated successfully!");
         window.setTimeout(() => {
           location.reload();
         }, 1500);
