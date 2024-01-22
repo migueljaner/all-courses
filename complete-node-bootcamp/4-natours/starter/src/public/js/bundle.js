@@ -11730,7 +11730,7 @@
         url: "/api/v1/users/logout"
       });
       if (res.data.status === "success")
-        location.reload(true);
+        location.href = "/";
     } catch (err) {
       alert("Error logging out! Try again.");
     }

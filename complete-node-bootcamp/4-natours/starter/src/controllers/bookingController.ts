@@ -58,8 +58,6 @@ export const getCheckoutSession = catchAsync(async (req, res, next) => {
     status: 'success',
     session,
   });
-
-  // 3) Create session as response
 });
 
 export const createBookingCheckout = catchAsync(async (req, res, next) => {

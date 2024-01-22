@@ -6,6 +6,7 @@ import * as factory from './handlerFactory';
 import multer from 'multer';
 import sharp from 'sharp';
 import path from 'path';
+import Booking from '../models/bookingModel';
 
 const multerStorage = multer.memoryStorage();
 
@@ -101,6 +102,20 @@ export const deleteMe = catchAsync(
     res.status(204).json({
       status: 'succes',
       data: null,
+    });
+  }
+);
+
+export const getUserBookings = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const bookings = await Booking.find({ user: req.params.id });
+
+    res.status(200).json({
+      status: 'success',
+      results: bookings.length,
+      data: {
+        bookings,
+      },
     });
   }
 );
