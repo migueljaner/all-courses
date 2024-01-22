@@ -27,12 +27,11 @@ router.patch(
 );
 router.delete('/deleteMe', userController.deleteMe);
 
-router
-  .route('/:id/bookings')
-  .get(authController.restrictTo('user'), userController.getUserBookings);
+router.get('/my-tours', userController.getMyTours);
 
 // Restrict all routes after this middleware to admin only
 router.use(authController.restrictTo('admin'));
+router.route('/:id/bookings').get(userController.getUserBookings);
 router
   .route('/')
   .get(userController.getAllUsers)

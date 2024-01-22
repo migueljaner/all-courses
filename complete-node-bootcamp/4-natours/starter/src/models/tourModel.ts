@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Mongoose } from 'mongoose';
 import slugify from 'slugify';
 
-interface ITourDoc extends Document {
+export interface ITourDoc extends Document {
   name: string;
   slug: string;
   duration: number;

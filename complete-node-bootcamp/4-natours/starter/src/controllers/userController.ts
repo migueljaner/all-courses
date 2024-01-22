@@ -7,6 +7,7 @@ import multer from 'multer';
 import sharp from 'sharp';
 import path from 'path';
 import Booking from '../models/bookingModel';
+import Tour from '../models/tourModel';
 
 const multerStorage = multer.memoryStorage();
 
@@ -115,6 +116,26 @@ export const getUserBookings = catchAsync(
       results: bookings.length,
       data: {
         bookings,
+      },
+    });
+  }
+);
+
+export const getMyTours = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // 1) Find all bookings
+    const bookings = await Booking.find({ user: req.user!.id });
+
+    // 2) Find tours with the returned IDs
+    const tourIDs = bookings.map((el) => el.tour);
+
+    const tours = await Tour.find({ _id: { $in: tourIDs } });
+
+    res.status(200).json({
+      status: 'success',
+      results: tours.length,
+      data: {
+        tours,
       },
     });
   }
