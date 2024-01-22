@@ -124,7 +124,7 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
       this.passwordChangedAt.getTime() / 1000 + '',
       10
     );
-    // console.log(changedTimestamp, JWTTimestamp);
+
     return JWTTimestamp < changedTimestamp;
   }
 
@@ -155,8 +155,6 @@ userSchema.methods.createEmailConfirmToken = function () {
 
   this.emailConfirmToken = hashedToken;
   this.emailConfirmExpires = Date.now() + 10 * 60 * 1000;
-
-  console.log('confirmToken', confirmToken);
 
   return confirmToken;
 };

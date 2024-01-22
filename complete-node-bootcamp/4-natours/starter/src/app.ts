@@ -10,6 +10,7 @@ import bookingRouter from './routes/bookingRoutes';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import compression from 'compression';
 import mongoSanitize from 'express-mongo-sanitize';
 import path from 'path';
 //@ts-expect-error
@@ -77,10 +78,11 @@ app.use(
   })
 );
 
+app.use(compression());
+
 // Test middleware
 app.use((req: Request, res: Response, next) => {
   req.requestTime = new Date().toISOString();
-  // console.log(req.headers);
   next();
 });
 
