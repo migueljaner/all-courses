@@ -34,3 +34,24 @@ export const logout = async () => {
     alert('Error logging out! Try again.');
   }
 };
+
+export const signup = async (data) => {
+  try {
+    const res = await axios({
+      method: 'POST',
+      url: '/api/v1/users/signup',
+      data,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    if (res.data.status === 'success') {
+      window.setTimeout(() => {
+        location.assign('/');
+      }, 1500);
+    }
+  } catch (err) {
+    alert(err.response.data.message);
+  }
+};
