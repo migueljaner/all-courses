@@ -1,12 +1,16 @@
 import express from 'express';
 import * as userController from '../controllers/userController';
 import * as authController from '../controllers/authController';
+import multer from 'multer';
 
 const router = express.Router();
 
-router.post('/signup', authController.signup);
+const upload = multer();
+
+router.post('/signup', upload.none(), authController.signup);
 router.post('/login', authController.login);
 router.get('/logout', authController.logout);
+router.get('/confirmEmail/:token', authController.confirmEmail);
 router.post('/forgotPassword', authController.forgotPassword);
 router.post('/resetPassword/:token', authController.resetPassword);
 
@@ -22,6 +26,10 @@ router.patch(
   userController.updateMe
 );
 router.delete('/deleteMe', userController.deleteMe);
+
+router
+  .route('/:id/bookings')
+  .get(authController.restrictTo('user'), userController.getUserBookings);
 
 // Restrict all routes after this middleware to admin only
 router.use(authController.restrictTo('admin'));

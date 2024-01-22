@@ -11730,9 +11730,28 @@
         url: "/api/v1/users/logout"
       });
       if (res.data.status === "success")
-        location.reload(true);
+        location.href = "/";
     } catch (err) {
       alert("Error logging out! Try again.");
+    }
+  };
+  var signup = async (data) => {
+    try {
+      const res = await axios_default({
+        method: "POST",
+        url: "/api/v1/users/signup",
+        data,
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+      if (res.data.status === "success") {
+        window.setTimeout(() => {
+          location.assign("/");
+        }, 1500);
+      }
+    } catch (err) {
+      alert(err.response.data.message);
     }
   };
 
@@ -11772,15 +11791,16 @@
   // src/public/js/updatesettings.js
   var updateSettings = async (data, type) => {
     try {
-      console.log("data", data);
       const url = type === "password" ? "/api/v1/users/updateMyPassword" : "/api/v1/users/updateMe";
       const res = await axios_default({
         method: "PATCH",
         url,
-        data
+        data,
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
       });
       if (res.data.status === "success") {
-        alert("Data updated successfully!");
         window.setTimeout(() => {
           location.reload();
         }, 1500);
@@ -11810,6 +11830,7 @@
   var leaflet = document.getElementById("map");
   var logoutBtn = document.querySelector(".nav__el--logout");
   var loginForm = document.querySelector(".form.login-form");
+  var signupForm = document.querySelector(".form.signup-form");
   var userDataFrom = document.querySelector(".form-user-data");
   var userSettingsFrom = document.querySelector(".form-user-settings");
   var bookBtn = document.getElementById("book-tour");
@@ -11826,6 +11847,14 @@
       const email = formData.get("email");
       const password = formData.get("password");
       await login(email, password);
+    });
+  if (signupForm)
+    signupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(signupForm);
+      formData.append("role", "user");
+      const formDataObj = Object.fromEntries(formData.entries());
+      await signup(formDataObj);
     });
   if (userDataFrom)
     userDataFrom.addEventListener("submit", async (e) => {

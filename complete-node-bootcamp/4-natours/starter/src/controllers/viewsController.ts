@@ -43,6 +43,12 @@ export const getLoginForm = (req: Request, res: Response) => {
   });
 };
 
+export const getSignupForm = (req: Request, res: Response) => {
+  res.status(200).render('signupForm', {
+    title: 'Create an account',
+  });
+};
+
 export const getMyTours = catchAsync(async (req: Request, res: Response) => {
   // 1) Find all bookings
   const bookings = await Booking.find({ user: req.user.id });
@@ -57,7 +63,10 @@ export const getMyTours = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const getAccount = (req: Request, res: Response) => {
+  const user = req.user;
+
   res.status(200).render('useracc', {
     title: 'Natours | Your account',
+    user,
   });
 };

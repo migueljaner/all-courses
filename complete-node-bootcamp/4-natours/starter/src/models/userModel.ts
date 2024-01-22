@@ -15,6 +15,8 @@ export interface IUserDoc {
   passwordChangedAt?: Date;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
+  emailConfirmToken?: string;
+  emailConfirmExpires?: Date;
   active?: boolean;
 }
 
@@ -25,6 +27,7 @@ interface IUserMethods {
   ) => Promise<boolean>;
   changedPasswordAfter: (JWTTimestamp: number) => boolean;
   createPasswordResetToken: () => string;
+  createEmailConfirmToken: () => string;
 }
 
 type UserModel = Model<IUserDoc, {}, IUserMethods>;
@@ -76,6 +79,8 @@ const userSchema = new Schema<IUserDoc, UserModel, IUserMethods>({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  emailConfirmToken: String,
+  emailConfirmExpires: Date,
 });
 
 userSchema.pre('save', async function (next) {
@@ -137,8 +142,23 @@ userSchema.methods.createPasswordResetToken = function () {
   this.passwordResetToken = hashedToken;
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 
-  console.log({ resetToken }, this.passwordResetToken);
   return resetToken;
+};
+
+userSchema.methods.createEmailConfirmToken = function () {
+  const confirmToken = crypto.randomBytes(32).toString('hex');
+
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(confirmToken)
+    .digest('hex');
+
+  this.emailConfirmToken = hashedToken;
+  this.emailConfirmExpires = Date.now() + 10 * 60 * 1000;
+
+  console.log('confirmToken', confirmToken);
+
+  return confirmToken;
 };
 
 const userModel = mongoose.model<IUserDoc, UserModel>('User', userSchema);

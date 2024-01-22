@@ -45,10 +45,19 @@ export const signup = catchAsync(
       role: req.body.role,
     });
 
-    const url = `${req.protocol}://${req.get('host')}/me`;
-    await new Email(newUser, url).sendWelcome();
+    const confirmToken = newUser.createEmailConfirmToken();
 
-    createSendToken(newUser, 201, res);
+    await newUser.save({ validateBeforeSave: false });
+
+    const url = `${req.protocol}://${req.get(
+      'host'
+    )}/api/v1/users/confirmEmail/${confirmToken}`;
+
+    await new Email(newUser, url).sendConfrimationEmail();
+
+    res.status(201).json({
+      status: 'success',
+    });
   }
 );
 
@@ -298,5 +307,61 @@ export const updatePassword = catchAsync(
 
     // 4) Log user in, send JWT
     createSendToken(user, 200, res);
+  }
+);
+
+export const confirmEmail = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const emailToken = req.params.token;
+
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(emailToken)
+      .digest('hex');
+
+    const user = await User.findOne({
+      emailConfirmToken: hashedToken,
+    });
+
+    if (user?.emailConfirmExpires && user.emailConfirmExpires < new Date()) {
+      user.deleteOne();
+
+      return next(
+        new AppError(
+          'Token is invalid or has expired, please sign up again',
+          400
+        )
+      );
+    }
+
+    if (!user) {
+      return next(
+        new AppError(
+          'Token is invalid or has expired, please sign up again',
+          400
+        )
+      );
+    }
+
+    user.emailConfirmToken = undefined;
+    user.emailConfirmExpires = undefined;
+    user.active = true;
+
+    await user.save({ validateBeforeSave: false });
+
+    const token = signToken(user._id.toString());
+
+    res
+      .status(200)
+      .cookie('jwt', token, {
+        expires: new Date(
+          Date.now() +
+            Number(process.env.JWT_COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000
+        ),
+        httpOnly: true,
+        //We only activate this in production
+        secure: process.env.NODE_ENV === 'production' ? true : false,
+      })
+      .redirect('/me');
   }
 );
