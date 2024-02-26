@@ -10,7 +10,9 @@ interface Attributes {
  * How do we create a type helper that represents a union
  * of all possible combinations of Attributes?
  */
-type MutuallyExclusive<T> = unknown;
+type MutuallyExclusive<T> = {
+  [K in keyof T]: Record<K, T[K]>
+}[keyof T];
 
 type ExclusiveAttributes = MutuallyExclusive<Attributes>;
 
@@ -19,14 +21,14 @@ type tests = [
     Equal<
       ExclusiveAttributes,
       | {
-          id: string;
-        }
+        id: string;
+      }
       | {
-          email: string;
-        }
+        email: string;
+      }
       | {
-          username: string;
-        }
+        username: string;
+      }
     >
   >,
 ];
