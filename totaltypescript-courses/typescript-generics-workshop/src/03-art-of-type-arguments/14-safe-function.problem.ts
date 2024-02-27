@@ -1,33 +1,20 @@
 import { expect, it } from "vitest";
 import { Equal, Expect } from "../helpers/type-utils";
 
-const makeSafe =
-  (func: unknown) =>
-  (
-    ...args: unknown
-  ):
-    | {
-        type: "success";
-        result: unknown;
-      }
-    | {
-        type: "failure";
-        error: Error;
-      } => {
-    try {
-      const result = func(...args);
-
-      return {
-        type: "success",
-        result,
-      };
-    } catch (e) {
-      return {
-        type: "failure",
-        error: e as Error,
-      };
-    }
-  };
+const makeSafe = <T extends (...args: any[]) => any>(func: T) => (...args: Parameters<T>): | { type: "success"; result: ReturnType<T>; } | { type: "failure"; error: Error; } => {
+  try {
+    const result = func(...args);
+    return {
+      type: "success",
+      result,
+    };
+  } catch (e) {
+    return {
+      type: "failure",
+      error: e as Error,
+    };
+  }
+};
 
 it("Should return the result with a { type: 'success' } on a successful call", () => {
   const func = makeSafe(() => 1);
@@ -44,13 +31,13 @@ it("Should return the result with a { type: 'success' } on a successful call", (
       Equal<
         typeof result,
         | {
-            type: "success";
-            result: number;
-          }
+          type: "success";
+          result: number;
+        }
         | {
-            type: "failure";
-            error: Error;
-          }
+          type: "failure";
+          error: Error;
+        }
       >
     >,
   ];
@@ -76,13 +63,13 @@ it("Should return the error on a thrown call", () => {
       Equal<
         typeof result,
         | {
-            type: "success";
-            result: string;
-          }
+          type: "success";
+          result: string;
+        }
         | {
-            type: "failure";
-            error: Error;
-          }
+          type: "failure";
+          error: Error;
+        }
       >
     >,
   ];

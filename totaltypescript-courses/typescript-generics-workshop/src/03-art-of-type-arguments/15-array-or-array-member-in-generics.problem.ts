@@ -1,6 +1,6 @@
 import { Equal, Expect } from "../helpers/type-utils";
 
-const makeStatus = <TStatuses extends string[]>(statuses: TStatuses) => {
+const makeStatus = <TStatuses extends string>(statuses: TStatuses[]) => {
   return statuses;
 };
 
