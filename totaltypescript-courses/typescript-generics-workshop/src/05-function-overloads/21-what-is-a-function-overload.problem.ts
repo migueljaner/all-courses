@@ -3,7 +3,9 @@ import { Equal, Expect } from "../helpers/type-utils";
 /**
  * This time, let's solve this with function overloads!
  */
-const returnWhatIPassIn = (t: unknown) => {
+function returnWhatIPassIn(t: 1): 1;
+function returnWhatIPassIn(t: 'matt'): 'matt';
+function returnWhatIPassIn(t: any) {
   return t;
 };
 
