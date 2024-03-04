@@ -26,6 +26,8 @@ const translate = <
   return translation.replace(/{(\w+)}/g, (_, key) => params[key]);
 };
 
+
+
 // TESTS
 
 const translations = {
