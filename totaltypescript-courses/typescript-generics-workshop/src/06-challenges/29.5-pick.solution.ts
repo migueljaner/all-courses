@@ -16,14 +16,14 @@ it("Should pick the keys from the object", () => {
     {
       a: 1,
       b: 2,
-      c: 3,
+      c: 'test',
     },
-    ["a", "b"]
+    ["a", "b", "c"]
   );
 
   expect(result).toEqual({ a: 1, b: 2 });
 
-  type test = Expect<Equal<typeof result, { a: number; b: number }>>;
+  type test = Expect<Equal<typeof result, { a: number; b: number; c: string }>>;
 });
 
 it("Should not allow you to pass keys which do not exist in the object", () => {

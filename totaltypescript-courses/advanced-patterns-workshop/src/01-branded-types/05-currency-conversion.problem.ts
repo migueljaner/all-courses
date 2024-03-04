@@ -7,6 +7,8 @@ interface User {
   maxConversionAmount: number;
 }
 
+type Valid<T> = Brand<T, 'Valid'>
+
 // Mocks a function that uses an API to convert
 // One currency to another
 const getConversionRateFromApi = async (
@@ -14,18 +16,18 @@ const getConversionRateFromApi = async (
   from: string,
   to: string,
 ) => {
-  return Promise.resolve(amount * 0.82);
+  return Promise.resolve(amount * 0.82) as Promise<Valid<number>>;
 };
 
 // Mocks a function which actually performs the conversion
-const performConversion = async (user: User, to: string, amount: number) => {};
+const performConversion = async (user: Valid<User>, to: string, amount: Valid<number>) => { };
 
-const ensureUserCanConvert = (user: User, amount: number): User => {
+const ensureUserCanConvert = (user: User, amount: Valid<number>): Valid<User> => {
   if (user.maxConversionAmount < amount) {
     throw new Error("User cannot convert currency");
   }
 
-  return user;
+  return user as Valid<User>;
 };
 
 describe("Possible implementations", () => {
