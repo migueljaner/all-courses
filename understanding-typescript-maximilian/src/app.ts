@@ -1,76 +1,8 @@
-type ValidateFn = {
-  value: string | number;
-  required?: boolean;
-  minLength?: number;
-  maxLength?: number;
-  min?: number;
-  max?: number;
-};
-
-function validate(validateInput: ValidateFn) {
-  let isValid = true;
-  if (validateInput.required) {
-    isValid = isValid && validateInput.value.toString().trim().length !== 0;
-  }
-  if (
-    validateInput.minLength != null &&
-    typeof validateInput.value === "string"
-  ) {
-    isValid = isValid && validateInput.value.length >= validateInput.minLength;
-  }
-  if (
-    validateInput.maxLength != null &&
-    typeof validateInput.value === "string"
-  ) {
-    isValid = isValid && validateInput.value.length <= validateInput.maxLength;
-  }
-  if (validateInput.min != null && typeof validateInput.value === "number") {
-    isValid = isValid && validateInput.value >= validateInput.min;
-  }
-  if (validateInput.max != null && typeof validateInput.value === "number") {
-    isValid = isValid && validateInput.value <= validateInput.max;
-  }
-  return isValid;
-}
-
-function autoBind(_: any, _2: string, descriptor: PropertyDescriptor) {
-  const originalMethod = descriptor.value;
-  const adjDescriptor: PropertyDescriptor = {
-    configurable: true,
-    enumerable: false,
-    get() {
-      const boundFn = originalMethod.bind(this);
-      return boundFn;
-    },
-  };
-  return adjDescriptor;
-}
-
-interface DragTarget {
-  dragOverHandler(event: DragEvent): void;
-  dropHandler(event: DragEvent): void;
-  dragLeaveHandler(event: DragEvent): void;
-}
-
-interface Draggable {
-  dragStartHandler(event: DragEvent): void;
-  dragEndHandler(event: DragEvent): void;
-}
-
-enum ProjectStatus {
-  Active,
-  Finished,
-}
-
-class Project {
-  constructor(
-    public id: string,
-    public title: string,
-    public description: string,
-    public people: number,
-    public status: ProjectStatus
-  ) {}
-}
+import { autoBind } from "./autobind-decorator";
+import { DragTarget, Draggable } from "./drag-drop-interfaces";
+import { Project, ProjectStatus } from "./project-model";
+import { ProjectState } from "./project-state";
+import { validate } from "./validation";
 
 abstract class Component<T extends HTMLElement, U extends HTMLElement> {
   templateElement: HTMLTemplateElement;
@@ -256,7 +188,11 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
 
     if (
       !validate({ value: enteredTitle, required: true }) ||
-      !validate({ value: enteredDescription, required: true, minLength: 5 }) ||
+      !validate({
+        value: enteredDescription,
+        required: true,
+        minLength: 5,
+      }) ||
       !validate({ value: +enteredPeople, required: true, min: 1, max: 5 })
     ) {
       alert("Invalid input, please try again!");
@@ -291,60 +227,6 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
   }
 }
 
-type Listener<T> = (items: T[]) => void;
-
-class State<T> {
-  protected listeners: Listener<T>[] = [];
-
-  addListener(listenerFn: Listener<T>) {
-    this.listeners.push(listenerFn);
-  }
-}
-
-class ProjectState extends State<Project> {
-  private projects: Project[] = [];
-  private static instance: ProjectState;
-
-  private constructor() {
-    super();
-  }
-
-  static getInstance() {
-    if (!this.instance) {
-      this.instance = new ProjectState();
-    }
-    return this.instance;
-  }
-
-  addProject(title: string, description: string, people: number) {
-    const newProject = new Project(
-      Math.random().toString(),
-      title,
-      description,
-      people,
-      ProjectStatus.Active
-    );
-    this.projects.push(newProject);
-
-    this.updateListeners();
-  }
-
-  moveProject(projectId: string, newStatus: ProjectStatus) {
-    const project = this.projects.find((prj) => prj.id === projectId);
-    if (project && project.status !== newStatus) {
-      project.status = newStatus;
-
-      this.updateListeners();
-    }
-  }
-
-  private updateListeners() {
-    for (const listenerFn of this.listeners) {
-      listenerFn(this.projects.slice());
-    }
-  }
-}
-
-const prjInput = new ProjectInput();
-const activePrjList = new ProjectList("active");
-const finishedPrjList = new ProjectList("finished");
+new ProjectInput();
+new ProjectList("active");
+new ProjectList("finished");
