@@ -11,6 +11,13 @@ declare global {
       username: string;
       password: string;
     };
+    LOG_OUT: {
+
+    };
+    UPDATE_USERNAME: {
+      username: string
+    }
+
   }
 
   /**
