@@ -9,14 +9,18 @@ type GetParamKeys<TTranslation extends string> = TTranslation extends ""
 type GetParamKeysAsUnion<TTranslation extends string> =
   GetParamKeys<TTranslation>[number];
 
-const translate = (translations: unknown, key: unknown, ...args: unknown[]) => {
-  const translation = translations[key];
+const translate = <T extends Record<string, string>, TKey extends keyof T, TArgs extends string[] = GetParamKeys<T[TKey]>>(translations: T, key: TKey, ...args: TArgs extends []
+  ? []
+  : [dynamicArgs: Record<TArgs[number], string>]) => {
+  const translation = translations[key] as string;
   const params: any = args[0] || {};
 
   return translation.replace(/{(\w+)}/g, (_, key) => params[key]);
 };
 
 // TESTS
+
+type TitleType = GetParamKeysAsUnion<typeof translations['title']>
 
 const translations = {
   title: "Hello, {name}!",

@@ -7,7 +7,7 @@ import { Equal, Expect } from "../helpers/type-utils";
  * you can fix all the errors below.
  */
 interface DOMNodeExtractorConfig<T, Result> {
-  isNode: (node: unknown) => boolean;
+  isNode: (node: unknown) => node is T;
   transform: (node: T) => Result;
 }
 

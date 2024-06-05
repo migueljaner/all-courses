@@ -11,6 +11,16 @@ import { Equal, Expect } from "../helpers/type-utils";
  * 3. Inside the NodeJS namespace, you'll need to add a
  * MY_ENV_VAR property to the ProcessEnv interface
  */
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      MY_ENV_VAR: string
+    }
+  }
+}
+
+
+
 
 process.env.MY_ENV_VAR = "Hello, world!";
 

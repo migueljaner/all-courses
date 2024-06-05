@@ -1,6 +1,6 @@
-type Route = unknown;
+type Route = `/${string}`;
 
-export const goToRoute = (route: Route) => {};
+export const goToRoute = (route: Route) => { };
 
 // Should succeed:
 

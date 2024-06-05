@@ -1,5 +1,6 @@
 import { it } from "vitest";
 import { Brand } from "../helpers/Brand";
+import { assert } from "console";
 
 type Valid<T> = Brand<T, "Valid">;
 
@@ -11,7 +12,7 @@ interface PasswordValues {
 /**
  * 💡 You'll need to change this function...
  */
-const isValidPassword = (values: PasswordValues) => {
+const isValidPassword = (values: PasswordValues): values is Valid<PasswordValues> => {
   if (values.password !== values.confirmPassword) {
     return false;
   }
